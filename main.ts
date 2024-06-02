@@ -1,4 +1,5 @@
 import { Plugin, MarkdownView, TFile, normalizePath } from 'obsidian';
+import * as d3 from 'd3';
 
 
 export default class MyPlugin extends Plugin {
@@ -15,6 +16,9 @@ export default class MyPlugin extends Plugin {
 	async onload() {
         console.log("Plugin loaded");
 
+		const d3Container = document.createElement('div');
+		d3Container.id = 'd3-container';
+		document.body.appendChild(d3Container);
 	
 		const config = await this.loadConfig();
 		this.apiKey = config.apiKey;
@@ -114,7 +118,24 @@ export default class MyPlugin extends Plugin {
                 this.handlePlusClick();
             });
         }	
+		this.createD3Visualization();
+
     }
+
+	createD3Visualization() {
+		const svg = d3.select("#d3-container")
+			.append("svg")
+			.attr("width", 200)
+			.attr("height", 200);
+
+		svg.append("circle")
+			.attr("cx", 100)
+			.attr("cy", 100)
+			.attr("r", 50)
+			.style("fill", "blue");
+
+		console.log("D3 visualization created");
+	}
 
     async handleRefresh() {
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -184,7 +205,7 @@ export default class MyPlugin extends Plugin {
 	}
 
     generatePrompt(therapyType: string, insightFilter: string, length: string): string {
-        return `You are the world's top therapist, trained in ${therapyType}. Your only job is to ${insightFilter}. Your responses must always be ${length}. Don't include any formatting or bullet points.`;
+        return `You are the world's top therapist, trained in ${therapyType}. Your only job is to ${insightFilter}. Your responses must always be ${length}. Don't include any formatting or bullet points. Don't hold anything back.`;
     }
 
 	async fetchAndDisplayResult(prompt: string, userInput: string, resultElementId: string, noteRange: string) {
@@ -300,6 +321,10 @@ export default class MyPlugin extends Plugin {
 
  
     onunload() {
+		const d3Container = document.getElementById('d3-container');
+		if (d3Container) {
+		d3Container.remove();
+		}		
         console.log("Plugin unloaded");
         const dropdownContainer = document.getElementById("dropdown-container");
         const popup = document.getElementById("popup");

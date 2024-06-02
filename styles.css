@@ -154,3 +154,14 @@
     top: -11px;
     right: -6px;
 }
+
+#d3-container {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background-color: lightgray;
+    /* Optional: for better visibility */
+}
