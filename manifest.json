@@ -1,0 +1,10 @@
+{
+  "id": "mind-mirror",
+  "name": "Mind Mirror",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Therapy built into Obsidian",
+  "author": "Obsidian",
+  "authorUrl": "https://x.com/itsgeorgepi",
+  "isDesktopOnly": true
+}

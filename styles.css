@@ -1,0 +1,156 @@
+
+
+#dropdown-container {
+    position: fixed;
+    bottom: 30px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    gap: 10px;
+    background-color: #2d2d2d;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid #444;
+}
+
+#dropdown-container label {
+    color: #f0f0f0;
+    font-weight: bold;
+    
+}
+
+#dropdown-container select {
+    background-color: #3a3a3a;
+    color: #f0f0f0;
+    border: 1px solid #555;
+    padding: 6px 10px;
+    border-radius: 4px;
+    
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+#dropdown-container select:focus {
+    border-color: #4caf50;
+    outline: none;
+}
+
+#refresh-button {
+    background-color: #4caf50;
+    color: #f0f0f0;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    
+}
+
+#refresh-button:hover {
+    background-color: #45a049;
+}
+
+.popup {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    background-color: #2d2d2d;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    border: 1px solid #444;
+
+}
+
+.popup h3 {
+    color: #f0f0f0;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+#result {
+    background-color: #1f1f1f;
+    color: #f0f0f0;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow: auto;
+    height: auto;
+    border: 1px solid #444;
+}
+
+.buttons-container {
+    display: flex;
+    width: 50%;
+    justify-content: space-evenly;
+    margin-left: 25%;
+    margin-top: 15px;
+}
+
+#heart-emoji {
+    
+    width: 30px;
+    height: 30px;
+    
+    text-align: center;
+    font-size: 24px;
+    
+    color: #b22222;
+    display: none;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+
+#heart-emoji {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font-size: 24px;
+    color: #b22222;
+    display: none;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+#plus-emoji {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font-size: 24px;
+    color: #f0f0f0;
+    : block;
+    transition: color 0.3s ease;
+    cursor: pointer;
+    display: none;
+    
+}
+
+#plus-emoji:hover {
+    color: #4caf50;
+}
+
+#heart-emoji:hover {
+    color: #e672cd;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+    top: -11px;
+    right: -6px;
+}
