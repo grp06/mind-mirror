@@ -166,3 +166,28 @@
     background-color: lightgray;
     /* Optional: for better visibility */
 }
+
+#settings-display {
+    color: #888;
+    font-size: 12px;
+    margin-top: 0;
+    padding: 5px;
+    background-color: #2d2d2d;
+    white-space: pre-line;
+    /* Ensure new lines are respected */
+}
+
+
+.therapy-label-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gear-icon {
+    font-size: 20px;
+    padding-left: 10px;
+    /* Adjust padding as needed */
+    cursor: pointer;
+    color: white;
+}
