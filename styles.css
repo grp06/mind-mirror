@@ -157,6 +157,7 @@
 
 #d3-container {
     position: fixed;
+    display: none;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);

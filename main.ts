@@ -1,27 +1,46 @@
-import { Plugin, MarkdownView, TFile, normalizePath } from 'obsidian';
+import { Plugin, MarkdownView, TFile } from 'obsidian';
 import * as d3 from 'd3';
+import MyPluginSettingTab from './MyPluginSettingTab'; // Import the new file
+
+interface MyPluginSettings {
+	apiKey: string;
+}
+
+const DEFAULT_SETTINGS: MyPluginSettings = {
+	apiKey: ''
+};
+
 
 
 export default class MyPlugin extends Plugin {
+	settings: MyPluginSettings;
+
 	private apiKey: string;
-
-
-	async loadConfig(): Promise<{ apiKey: string }> {
-		const configPath = normalizePath(this.app.vault.configDir + '/plugins/mind-mirror/config.json');
-		console.log("🚀 ~ MyPlugin ~ loadConfig ~ configPath:", configPath)
-		const configContent = await this.app.vault.adapter.read(configPath);
-		return JSON.parse(configContent);
+	async loadSettings() {
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
-    
+
+	async saveSettings() {
+		await this.saveData(this.settings);
+	}
+
+
 	async onload() {
+
+
+		this.addSettingTab(new MyPluginSettingTab(this.app, this));
+		await this.loadSettings();
+		if (this.settings.apiKey) {
+            console.log("User's API Key:", this.settings.apiKey);
+        } else {
+            console.log("No API Key found.");
+        }
         console.log("Plugin loaded");
 
 		const d3Container = document.createElement('div');
 		d3Container.id = 'd3-container';
 		document.body.appendChild(d3Container);
 	
-		const config = await this.loadConfig();
-		this.apiKey = config.apiKey;
 		const link = document.createElement("link");
 		link.rel = "stylesheet";
 		link.href = "https://fonts.googleapis.com/icon?family=Material+Icons";
@@ -208,66 +227,64 @@ export default class MyPlugin extends Plugin {
         return `You are the world's top therapist, trained in ${therapyType}. Your only job is to ${insightFilter}. Your responses must always be ${length}. Don't include any formatting or bullet points. Don't hold anything back.`;
     }
 
-	async fetchAndDisplayResult(prompt: string, userInput: string, resultElementId: string, noteRange: string) {
-		try {
-			let notesContent = userInput;
-			if (noteRange !== "current") {
-				const notes = await this.getRecentNotes(noteRange);
-				notesContent = notes.join("\n\n");
+async fetchAndDisplayResult(prompt: string, userInput: string, resultElementId: string, noteRange: string) {
+	try {
+		let notesContent = userInput;
+		if (noteRange !== "current") {
+			const notes = await this.getRecentNotes(noteRange);
+			notesContent = notes.join("\n\n");
+		}
+
+		const response = await fetch(
+			"https://api.openai.com/v1/chat/completions",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${this.settings.apiKey}`, // Use stored API key
+				},
+				body: JSON.stringify({
+					model: "gpt-4",
+					messages: [
+						{ role: "system", content: prompt },
+						{ role: "user", content: notesContent },
+					],
+				}),
 			}
+		);
 
-			const response = await fetch(
-				"https://api.openai.com/v1/chat/completions",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${this.apiKey}`,
+		const data = await response.json();
+		const resultDiv = document.getElementById(resultElementId);
+		const heartEmoji = document.getElementById("heart-emoji");
+		const plusEmoji = document.getElementById("plus-emoji");
 
-					},
-					body: JSON.stringify({
-						model: "gpt-4o",
-						messages: [
-							{ role: "system", content: prompt },
-							{ role: "user", content: notesContent },
-						],
-					}),
-				}
-			);
+		if (heartEmoji) {
+			heartEmoji.addEventListener("click", () => {
+				this.handleHeartClick();
+			});
+		}
 
-			const data = await response.json();
-			const resultDiv = document.getElementById(resultElementId);
-			const heartEmoji = document.getElementById("heart-emoji");
-			const plusEmoji = document.getElementById("plus-emoji");
-
-			if (heartEmoji) {
-				heartEmoji.addEventListener("click", () => {
-					this.handleHeartClick();
-				});
+		if (resultDiv) {
+			resultDiv.innerText = data.choices[0].message.content;
+			if (heartEmoji && plusEmoji) {
+				heartEmoji.style.display = "block";
+				plusEmoji.style.display = "block"; // Ensure plus emoji is displayed
 			}
+		}
+	} catch (error) {
+		const resultDiv = document.getElementById(resultElementId);
+		const heartEmoji = document.getElementById("heart-emoji");
+		const plusEmoji = document.getElementById("plus-emoji");
 
-			if (resultDiv) {
-				resultDiv.innerText = data.choices[0].message.content;
-				if (heartEmoji && plusEmoji) {
-					heartEmoji.style.display = "block";
-					plusEmoji.style.display = "block"; // Ensure plus emoji is displayed
-				}
-			}
-		} catch (error) {
-			const resultDiv = document.getElementById(resultElementId);
-			const heartEmoji = document.getElementById("heart-emoji");
-			const plusEmoji = document.getElementById("plus-emoji");
-
-			if (resultDiv) {
-				resultDiv.innerText = "Error: " + (error as Error).message;
-				if (heartEmoji && plusEmoji) {
-					heartEmoji.style.display = "none";
-					plusEmoji.style.display = "none"; // Ensure plus emoji is hidden on error
-				}
+		if (resultDiv) {
+			resultDiv.innerText = "Error: " + (error as Error).message;
+			if (heartEmoji && plusEmoji) {
+				heartEmoji.style.display = "none";
+				plusEmoji.style.display = "none"; // Ensure plus emoji is hidden on error
 			}
 		}
 	}
-
+}
 
 	async getRecentNotes(range: string): Promise<string[]> {
 		const files = this.app.vault.getMarkdownFiles();
