@@ -1,3 +1,5 @@
+import { requestUrl } from 'obsidian';
+
 export async function fetchAndDisplayResult(plugin: any, prompt: string, userInput: string, resultElementId: string, noteRange: string) {
 	try {
 		let notesContent = userInput;
@@ -6,25 +8,23 @@ export async function fetchAndDisplayResult(plugin: any, prompt: string, userInp
 			notesContent = notes.join("\n\n");
 		}
 
-		const response = await fetch(
-			"https://api.openai.com/v1/chat/completions",
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${plugin.settings.apiKey}`, // Use stored API key
-				},
-				body: JSON.stringify({
-					model: "gpt-4",
-					messages: [
-						{ role: "system", content: prompt },
-						{ role: "user", content: notesContent },
-					],
-				}),
-			}
-		);
+		const response = await requestUrl({
+			url: "https://api.openai.com/v1/chat/completions",
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${plugin.settings.apiKey}`, // Use stored API key
+			},
+			body: JSON.stringify({
+				model: "gpt-4",
+				messages: [
+					{ role: "system", content: prompt },
+					{ role: "user", content: notesContent },
+				],
+			}),
+		});
 
-		const data = await response.json();
+		const data = response.json;
 		
 		const resultDiv = document.getElementById(resultElementId);
 		

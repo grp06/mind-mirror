@@ -93,9 +93,9 @@ export default class MindMirror extends Plugin {
 		const currentNoteFile = view.file;
 		const currentNoteDate = currentNoteFile?.basename; 
 
-		const feedbackFile = this.app.vault.getAbstractFileByPath("ai-feedback.md") as TFile;
+		const feedbackFile = this.app.vault.getAbstractFileByPath("ai-feedback.md");
 
-		if (feedbackFile) {
+		if (feedbackFile instanceof TFile) { // Use instanceof check
 			const content = await this.app.vault.read(feedbackFile);
 			const updatedContent = `### ${currentNoteDate}\n${advice}\n\n${content}`;
 			await this.app.vault.modify(feedbackFile, updatedContent);
