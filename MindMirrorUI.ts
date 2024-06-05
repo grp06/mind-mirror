@@ -1,5 +1,3 @@
-import MyPlugin from './main'; // Adjust the path if necessary
-import MindMirrorSettingTab from './MindMirrorSettingTab';
 export function createUIElements(plugin: MyPlugin) { // Specify the type of plugin
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -30,8 +28,19 @@ export function createUIElements(plugin: MyPlugin) { // Specify the type of plug
 
     const therapyDropdown = dropdownContainer.createEl("select");
     therapyDropdown.setAttr("id", "therapy-type-dropdown");
-    ["cbt", "sfbt", "gestalt", "dbt", "mbct", "psychodynamic", "humanistic", "existential", "ipt", "family-systems"].forEach(type => {
-        therapyDropdown.createEl("option", { value: type, text: type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + " Therapy" });
+    [
+        { value: "cbt", text: "Cognitive Behavioral Therapy" },
+        { value: "sfbt", text: "Solution-Focused Brief Therapy" },
+        { value: "gestalt", text: "Gestalt Therapy" },
+        { value: "dbt", text: "Dialectical Behavior Therapy" },
+        { value: "mbct", text: "Mindfulness-Based Cognitive Therapy" },
+        { value: "psychodynamic", text: "Psychodynamic Therapy" },
+        { value: "humanistic", text: "Humanistic Therapy" },
+        { value: "existential", text: "Existential Therapy" },
+        { value: "ipt", text: "Interpersonal Therapy" },
+        { value: "family-systems", text: "Family Systems Therapy" }
+    ].forEach(type => {
+        therapyDropdown.createEl("option", { value: type.value, text: type.text });
     });
 
     dropdownContainer.createEl("label", { attr: { for: "insight-filter-dropdown" }, text: "Insight Filter" });
@@ -73,7 +82,6 @@ export function createUIElements(plugin: MyPlugin) { // Specify the type of plug
             }
         });
     }
-
     const refreshButtonElement = document.getElementById("refresh-button");
     if (refreshButtonElement) {
         refreshButtonElement.addEventListener("click", () => {
