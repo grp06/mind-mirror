@@ -1,5 +1,4 @@
 import { Plugin, MarkdownView, TFile } from 'obsidian';
-import * as d3 from 'd3';
 import MyPluginSettingTab from './MyPluginSettingTab'; // Import the new file
 
 interface MyPluginSettings {
@@ -36,10 +35,6 @@ export default class MyPlugin extends Plugin {
             console.log("No API Key found.");
         }
         console.log("Plugin loaded");
-
-		const d3Container = document.createElement('div');
-		d3Container.id = 'd3-container';
-		document.body.appendChild(d3Container);
 	
 		const link = document.createElement("link");
 		link.rel = "stylesheet";
@@ -137,24 +132,8 @@ export default class MyPlugin extends Plugin {
                 this.handlePlusClick();
             });
         }	
-		this.createD3Visualization();
 
     }
-
-	createD3Visualization() {
-		const svg = d3.select("#d3-container")
-			.append("svg")
-			.attr("width", 200)
-			.attr("height", 200);
-
-		svg.append("circle")
-			.attr("cx", 100)
-			.attr("cy", 100)
-			.attr("r", 50)
-			.style("fill", "blue");
-
-		console.log("D3 visualization created");
-	}
 
     async handleRefresh() {
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -338,10 +317,7 @@ async fetchAndDisplayResult(prompt: string, userInput: string, resultElementId: 
 
  
     onunload() {
-		const d3Container = document.getElementById('d3-container');
-		if (d3Container) {
-		d3Container.remove();
-		}		
+
         console.log("Plugin unloaded");
         const dropdownContainer = document.getElementById("dropdown-container");
         const popup = document.getElementById("popup");
