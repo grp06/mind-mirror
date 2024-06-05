@@ -30,35 +30,82 @@ export default class MindMirror extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+    extractFeelings(content: string): string[] {
+        const feelings: string[] = [];
+        const lines = content.split("\n");
+        let isFeelingsSection = false;
 
-	async onload() {
-		await this.loadSettings();
-		this.settingsTab = new MindMirrorSettingTab(this.app, this); // Initialize the settingsTab
-		this.addSettingTab(this.settingsTab);
-		console.log("Plugin loaded");
-		createUIElements(this);
-	}
-	async handleRefresh() {
-		console.log('hi');
-		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-		if (view) {
-			const userInput = view.editor.getValue();
-			const therapyType = (document.getElementById("therapy-type-dropdown") as HTMLSelectElement).value;
-			const insightFilter = (document.getElementById("insight-filter-dropdown") as HTMLSelectElement).value;
-			const length = this.settings.length; // Use the length from settings
-			const noteRange = this.settings.noteRange; // Use the note range from settings
-			const prompt = this.generatePrompt(therapyType, insightFilter, length);
+        for (const line of lines) {
+            if (line.startsWith("# Daily Feelings")) {
+                isFeelingsSection = true;
+                continue;
+            }
+            if (isFeelingsSection) {
+                if (line.startsWith("- ")) {
+                    feelings.push(line.substring(2).trim());
+                } else {
+                    break; // Exit the section if we encounter a non-feeling line
+                }
+            }
+        }
+        return feelings;
+    }	
 
-			const resultDiv = document.getElementById("result");
-			const popup = document.getElementById("popup");
-			if (resultDiv && popup) {
-				resultDiv.innerText = "Fetching feedback...";
-				popup.style.display = "block"; 
-			}
+    async handleFeelingClick(feeling: string) {
+        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (!view) return;
 
-			this.fetchAndDisplayResult(prompt, userInput, "result", noteRange);
-		}
-	}
+        const editor = view.editor;
+        const currentContent = editor.getValue();
+        const formattedFeeling = `- ${feeling}`;
+
+        let updatedContent;
+        if (currentContent.startsWith("# Daily Feelings")) {
+            const lines = currentContent.split("\n");
+            const index = lines.findIndex(line => line.startsWith("# Daily Feelings"));
+            lines.splice(index + 1, 0, formattedFeeling);
+            updatedContent = lines.join("\n");
+        } else {
+            updatedContent = `# Daily Feelings\n${formattedFeeling}\n\n${currentContent}`;
+        }
+
+        editor.setValue(updatedContent);
+        editor.setCursor({ line: 0, ch: 0 });
+        editor.scrollIntoView({ from: { line: 0, ch: 0 }, to: { line: 0, ch: 0 } });
+    }
+
+
+    async onload() {
+        await this.loadSettings();
+        this.settingsTab = new MindMirrorSettingTab(this.app, this);
+        this.addSettingTab(this.settingsTab);
+        console.log("Plugin loaded");
+        createUIElements(this);
+    }
+
+    async handleRefresh() {
+        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (view) {
+            const userInput = view.editor.getValue();
+            const therapyType = (document.getElementById("therapy-type-dropdown") as HTMLSelectElement).value;
+            const insightFilter = (document.getElementById("insight-filter-dropdown") as HTMLSelectElement).value;
+            const length = this.settings.length; // Use the length from settings
+            const noteRange = this.settings.noteRange; // Use the note range from settings
+
+            const userFeelings = this.extractFeelings(userInput);
+            const prompt = this.generatePrompt(therapyType, insightFilter, length, userFeelings);
+            console.log("🚀 ~ MindMirror ~ handleRefresh ~ prompt:", prompt)
+
+            const resultDiv = document.getElementById("result");
+            const popup = document.getElementById("popup");
+            if (resultDiv && popup) {
+                resultDiv.innerText = "Fetching feedback...";
+                popup.style.display = "block"; 
+            }
+
+            this.fetchAndDisplayResult(prompt, userInput, "result", noteRange);
+        }
+    }
 
 	async handlePlusClick() {
 		const resultDiv = document.getElementById("result");
@@ -107,8 +154,9 @@ export default class MindMirror extends Plugin {
 		}
 	}
 
-    generatePrompt(therapyType: string, insightFilter: string, length: string): string {
-        return `You are the world's top therapist, trained in ${therapyType}. Your only job is to ${insightFilter}. Your responses must always be ${length}. Don't include any formatting or bullet points. Don't hold anything back.`;
+    generatePrompt(therapyType: string, insightFilter: string, length: string, userFeelings: string[]): string {
+        const feelingsString = userFeelings.length > 0 ? `Keep in mind, the user has gone through these feelings today: ${userFeelings.join(", ")}.` : "";
+        return `You are the world's top therapist, trained in ${therapyType}. Your only job is to ${insightFilter}. Your responses must always be ${length}. ${feelingsString} Don't include any formatting or bullet points.`;
     }
 
 	async fetchAndDisplayResult(prompt: string, userInput: string, resultElementId: string, noteRange: string) {
