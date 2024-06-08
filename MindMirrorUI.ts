@@ -1,6 +1,7 @@
 import { feelingCategories } from './feelings';
 import MyPlugin from './main'; // Adjust the path if necessary
-
+import { handleRefresh } from './refreshHandler';
+import { MarkdownView, Notice } from 'obsidian';
 export function createUIElements(plugin: MyPlugin) { // Specify the type of plugin
     const link = document.createElement("link");
     function getCategoryColor(category: string): string {
@@ -141,7 +142,6 @@ export function createUIElements(plugin: MyPlugin) { // Specify the type of plug
         { value: "cbt", text: "Cognitive Behavioral Therapy" },
         { value: "sfbt", text: "Solution-Focused Brief Therapy" },
         { value: "gestalt", text: "Gestalt Therapy" },
-        { value: "dbt", text: "Dialectical Behavior Therapy" },
         { value: "mbct", text: "Mindfulness-Based Cognitive Therapy" },
         { value: "psychodynamic", text: "Psychodynamic Therapy" },
         { value: "humanistic", text: "Humanistic Therapy" },
@@ -182,6 +182,24 @@ export function createUIElements(plugin: MyPlugin) { // Specify the type of plug
     plusEmoji.createEl("i", { cls: "material-icons", text: "add" });
     console.log("Container appended to body");
 
+    // Add the new "Update Memories" button
+    const updateMemoriesButton = dropdownContainer.createEl("button", { text: "Update Memories" });
+    updateMemoriesButton.setAttr("id", "update-memories-button");
+    const updateMemoriesButtonElement = document.getElementById("update-memories-button");
+    if (updateMemoriesButtonElement) {
+        updateMemoriesButtonElement.addEventListener("click", async () => {
+            const view = plugin.app.workspace.getActiveViewOfType(MarkdownView);
+            if (view) {
+                const userInput = view.editor.getValue();
+                const memories = await plugin.fetchMemories(userInput);
+                new Notice('Memories updated');
+                console.log("🚀 ~ MindMirror ~ updateMemoriesButton ~ memories:", memories);
+
+                // Save memories to a note
+                await plugin.saveMemoriesToNote(memories);
+            }
+        });
+    }
     const closeButtonElement = document.getElementById("close-button");
     if (closeButtonElement) {
         closeButtonElement.addEventListener("click", () => {
@@ -195,7 +213,7 @@ export function createUIElements(plugin: MyPlugin) { // Specify the type of plug
     if (refreshButtonElement) {
         refreshButtonElement.addEventListener("click", () => {
             console.log("Refresh button clicked"); // Debugging line
-            plugin.handleRefresh();
+            handleRefresh(plugin);
         });
     }
     const plusEmojiElement = document.getElementById("plus-emoji");

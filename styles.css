@@ -252,3 +252,18 @@
     background-color: #444;
 }
 
+#update-memories-button {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    /* Add some space between the buttons */
+}
+
+#update-memories-button:hover {
+    background-color: #333;
+}

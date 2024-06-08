@@ -85,6 +85,18 @@ export default class MindMirrorSettingTab extends PluginSettingTab {
 		// Add a section to display current settings
 		const currentSettingsEl = containerEl.createEl('div', { cls: 'current-settings' });
 		this.updateCurrentSettingsDisplay(currentSettingsEl);
+
+		// Add Update Memories button
+		const updateMemoriesButton = containerEl.createEl('button', { text: 'Update Memories' });
+		updateMemoriesButton.addEventListener('click', async () => {
+			const view = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+			if (view) {
+				const userInput = view.editor.getValue();
+				const memories = await this.plugin.fetchMemories(userInput);
+				new Notice('Memories updated');
+				console.log("🚀 ~ MindMirror ~ updateMemoriesButton ~ memories:", memories);
+			}
+		});
 	}
 
 	updateCurrentSettingsDisplay(currentSettingsEl?: HTMLElement): void {
@@ -106,4 +118,3 @@ export default class MindMirrorSettingTab extends PluginSettingTab {
 		}
 	}
 }
-

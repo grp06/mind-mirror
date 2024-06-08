@@ -1,6 +1,6 @@
 import { Plugin, MarkdownView, TFile } from 'obsidian';
 import MindMirrorSettingTab from './MindMirrorSettingTab'; 
-import { fetchAndDisplayResult } from './apiHandler'; 
+import { fetchAndDisplayResult, fetchMemories } from './apiHandler'; 
 import { createUIElements } from './MindMirrorUI';
 
 interface MindMirrorSettings {
@@ -29,6 +29,65 @@ export default class MindMirror extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	async fetchMemories(userInput: string): Promise<string> {
+		const aiMemoriesPath = "AI-memories.md";
+		const aiMemoriesFile = this.app.vault.getAbstractFileByPath(aiMemoriesPath);
+		let aiMemoriesContent = "";
+
+		if (aiMemoriesFile instanceof TFile) {
+			aiMemoriesContent = await this.app.vault.read(aiMemoriesFile);
+		}
+
+		return await fetchMemories(this, userInput, aiMemoriesContent);
+	}
+
+	async handleMemoryFetch() {
+		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!view) return;
+
+		const userInput = view.editor.getValue();
+		const memories = await this.fetchMemories(userInput);
+
+		console.log("Fetched memories:", memories);
+	}
+    async openAIMemoriesNote() {
+        const notePath = "AI-memories.md";
+        const memoryFile = this.app.vault.getAbstractFileByPath(notePath);
+
+        if (memoryFile instanceof TFile) {
+            const leaf = this.app.workspace.getLeaf(true);
+            await leaf.openFile(memoryFile);
+        }
+    }
+    async saveMemoriesToNote(memories: string) {
+        const notePath = "AI-memories.md";
+        const memoryFile = this.app.vault.getAbstractFileByPath(notePath);
+
+        // Get the date from the current note's filename
+        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (!view) return;
+        const currentNoteFile = view.file;
+        const currentNoteDate = currentNoteFile?.basename; // Assuming the date is in the basename
+
+        console.log("🚀 ~ MindMirror ~ saveMemoriesToNote ~ currentNoteDate:", currentNoteDate);
+        
+        // Append the date to each bullet point in the memories string
+        const memoriesWithDate = memories.split('\n').map(memory => `${memory} - ${currentNoteDate}`).join('\n');
+
+        if (memoryFile instanceof TFile) {
+            // Append to the top of the existing file
+            const content = await this.app.vault.read(memoryFile);
+            const updatedContent = `${memoriesWithDate}\n\n${content}`;
+            await this.app.vault.modify(memoryFile, updatedContent);
+        } else {
+            // Create a new file with the memories
+            await this.app.vault.create(notePath, memoriesWithDate);
+        }
+
+        // Open the AI-memories note
+        await this.openAIMemoriesNote();
+    }
 
     extractFeelings(content: string): string[] {
         const feelings: string[] = [];
@@ -103,7 +162,8 @@ export default class MindMirror extends Plugin {
                 popup.style.display = "block"; 
             }
 
-            this.fetchAndDisplayResult(prompt, userInput, "result", noteRange);
+			await fetchAndDisplayResult(this, { prompt, userInput, resultElementId: "result", noteRange });
+
         }
     }
 
@@ -155,12 +215,12 @@ export default class MindMirror extends Plugin {
 	}
 
     generatePrompt(therapyType: string, insightFilter: string, length: string, userFeelings: string[]): string {
-        const feelingsString = userFeelings.length > 0 ? `Keep in mind, the user has gone through these feelings today: ${userFeelings.join(", ")}.` : "";
-        return `You are the world's top therapist, trained in ${therapyType}. Your only job is to ${insightFilter}. Your responses must always be ${length}. ${feelingsString} Don't include any formatting or bullet points.`;
+        const feelingsString = userFeelings.length > 0 ? `Keep in mind, the user has gone through these feelings today: ${userFeelings.join(", ")}. You don't have to mention them. Just keep them in mind` : "";
+        return `You are the world's top therapist, trained in ${therapyType}. Your only job is to ${insightFilter}. Your responses must always be ${length}. Don't include any formatting or bullet points.`;
     }
 
-	async fetchAndDisplayResult(prompt: string, userInput: string, resultElementId: string, noteRange: string) {
-		await fetchAndDisplayResult(this, prompt, userInput, resultElementId, noteRange);
+	async fetchAndDisplayResult({ prompt, userInput, resultElementId, noteRange }: { prompt: string, userInput: string, resultElementId: string, noteRange: string }) {
+		await fetchAndDisplayResult(this, { prompt, userInput, resultElementId, noteRange });
 	}
 
 	async getRecentNotes(range: string): Promise<string[]> {
