@@ -13,13 +13,7 @@ Mind Mirror is a powerful AI journaling tool that provides real-time feedback an
    ```
 
 2. **Configure API Key:**
-   - Rename `config.example.json` to `config.json`
-   - Add your OpenAI API key in `config.json`:
-    ```json
-    {
-    "apiKey": "YOUR_OPENAI_API_KEY"
-    }
-     ```
+   - open up Obsidian settings and paste in your OpenAI API key
 
 3. **Build and Run:**
    ```bash
@@ -32,8 +26,9 @@ Mind Mirror is a powerful AI journaling tool that provides real-time feedback an
 
 1. **Load the Plugin:**
    - Open Obsidian.
-   - Go to `Settings` > `Community Plugins` > `Install Plugin`.
-   - Locate and enable `Mind Mirror`.
+   - Go to `Settings` > `Community Plugins` > `Installed Plugins`.
+   - open that folder
+   - that's where you need to place the cloned repo
 
 2. **Configure the Plugin:**
    - In Obsidian, navigate to the Mind Mirror settings to customize your experience.
@@ -43,16 +38,3 @@ Mind Mirror is a powerful AI journaling tool that provides real-time feedback an
    - Press the `Refresh` button to get feedback and insights on your journal entry.
    - If you press the heart button, it will add the current LLM response to a note called AI Feedback.
    - If you press the "+" button, it will append the LLM response to the bottom of the current note.
-
-
-### Example Configuration
-
-```json
-{
-  "apiKey": "YOUR_OPENAI_API_KEY"
-}
-```
-
-### Additional Information
-
-- Ensure you have the latest version of Obsidian installed.
