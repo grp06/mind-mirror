@@ -267,3 +267,60 @@
 #update-memories-button:hover {
     background-color: #333;
 }
+
+/* Container styling */
+#auth-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid #444;
+}
+
+/* Radio buttons and labels */
+#auth-container input[type="radio"] {
+    margin-right: 5px;
+}
+
+#auth-container label {
+    color: #f0f0f0;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+/* Input fields */
+#auth-container input[type="email"],
+#auth-container input[type="password"] {
+    background-color: #3a3a3a;
+    color: #f0f0f0;
+    border: 1px solid #555;
+    padding: 10px;
+    border-radius: 4px;
+    width: 100%;
+    margin-bottom: 10px;
+    transition: border-color 0.3s ease;
+}
+
+#auth-container input[type="email"]:focus,
+#auth-container input[type="password"]:focus {
+    border-color: #4caf50;
+    outline: none;
+}
+
+/* Submit button */
+#auth-container button {
+    background-color: #4caf50;
+    color: #f0f0f0;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#auth-container button:hover {
+    background-color: #45a049;
+}

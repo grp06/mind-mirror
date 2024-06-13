@@ -1,5 +1,7 @@
-import { PluginSettingTab, Setting, App, Notice } from 'obsidian';
+import { PluginSettingTab, Setting, App, Notice, MarkdownView } from 'obsidian';
 import MyPlugin from './main'; // Adjust the path if necessary
+import { loadMagicSDK, getMagicInstance } from './magic';
+import { EmailModal } from './EmailModal'; // Adjust the path if necessary
 
 export default class MindMirrorSettingTab extends PluginSettingTab {
 	plugin: MyPlugin;
@@ -44,10 +46,9 @@ export default class MindMirrorSettingTab extends PluginSettingTab {
 					.addOption('three sentences', 'Three Sentences')
 					.addOption('one paragraph', 'One Paragraph')
 					.setValue(this.plugin.settings.length)
-					.onChange(async (value) => { // Ensure the value is passed to the handler
-						console.log("🚀 ~ MyPluginSettingTab ~ .onChange ~ value:", value)
+					.onChange(async (value) => {
 						this.plugin.settings.length = value;
-						this.updateCurrentSettingsDisplay(); // Update display on change
+						this.updateCurrentSettingsDisplay();
 						await this.plugin.saveSettings();
 					});
 			});
@@ -65,10 +66,9 @@ export default class MindMirrorSettingTab extends PluginSettingTab {
 					.addOption('last10', 'Last 10 notes')
 					.addOption('last20', 'Last 20 notes')
 					.setValue(this.plugin.settings.noteRange)
-					.onChange(async (value) => { // Ensure the value is passed to the handler
-						console.log("🚀 ~ MyPluginSettingTab ~ .onChange ~ value:", value)
+					.onChange(async (value) => {
 						this.plugin.settings.noteRange = value;
-						this.updateCurrentSettingsDisplay(); // Update display on change
+						this.updateCurrentSettingsDisplay();
 						await this.plugin.saveSettings();
 					});
 			});
@@ -97,11 +97,43 @@ export default class MindMirrorSettingTab extends PluginSettingTab {
 				console.log("🚀 ~ MindMirror ~ updateMemoriesButton ~ memories:", memories);
 			}
 		});
+
+		
+
+		// Add Magic authentication button
+		// Replace the Magic authentication button with your custom email auth button
+		const authButton = containerEl.createEl('button', { text: 'Authenticate with Email' });
+		authButton.addEventListener('click', async () => {
+			new EmailModal(this.app, async (email, isSignUp) => {
+				try {
+					const endpoint = isSignUp ? '/api/signup/' : '/api/login/';
+					const response = await fetch(`https://your-django-app.com${endpoint}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ email }),
+					});
+					if (response.ok) {
+						const data = await response.json();
+						console.log('Authenticated successfully:', data);
+						new Notice('Authenticated successfully');
+					} else {
+						const error = await response.json();
+						console.error('Authentication failed:', error);
+						new Notice('Authentication failed');
+					}
+				} catch (error) {
+					console.error('Authentication failed:', error);
+					new Notice('Authentication failed');
+				}
+			}).open();
+		});
 	}
 
 	updateCurrentSettingsDisplay(currentSettingsEl?: HTMLElement): void {
 		const { length, noteRange } = this.plugin.settings;
-		const displayText = `Length: ${length}\nNote range: ${noteRange}`; // Add line break
+		const displayText = `Length: ${length}\nNote range: ${noteRange}`;
 		if (currentSettingsEl) {
 			currentSettingsEl.setText(displayText);
 		} else {
@@ -111,7 +143,6 @@ export default class MindMirrorSettingTab extends PluginSettingTab {
 			}
 		}
 
-		// Update the settings display in the UI
 		const settingsDisplay = document.getElementById("settings-display");
 		if (settingsDisplay) {
 			settingsDisplay.setText(displayText);
